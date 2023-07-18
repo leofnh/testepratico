@@ -12,12 +12,12 @@ app.set('views', path.join(__dirname, 'template'));
 app.engine('html', require('ejs').renderFile);
 
 
-function gravarLog(log) {
+function gravarLog(log, arquivo) {
 
-    const arquivo = 'log_deletados.txt';
     const caminhoArquivo = path.join(__dirname, 'logs',  arquivo);
+    const dataAtual = new Date();
 
-    fs.appendFile(caminhoArquivo, log + '\n', (err) => {
+    fs.appendFile(caminhoArquivo, log + ' - ' + dataAtual.toString() +  '\n', (err) => {
         if (err) {
             console.error('Erro ao gravar o log: ', err);
         } else {
@@ -50,7 +50,8 @@ app.post('/deletartel', async (req, res) => {
 
         
         const log = `Telefone ${telefoneDeletado} foi deletado.`;
-        gravarLog(log);
+        const arquivo = 'log_deletados.txt';
+        gravarLog(log, arquivo);
 
         data = {
             status: 'Telefone removido com sucesso!',
@@ -242,14 +243,14 @@ class BuscarContato {
 app.post('/deletarcontato', async (req, res)=> {
     const id_contato = req.body.id_contato;
 
-   
+
     const contato_existe = await prisma.contato.findFirst({
         where: {
             id: id_contato,
         }
     });
     if (contato_existe) {
-
+         const contatoDeletado = contato_existe.nome;
         const deletar_telefones = await prisma.telefone.deleteMany({
             where: {
                 idcontato: id_contato
@@ -261,7 +262,10 @@ app.post('/deletarcontato', async (req, res)=> {
                 id: id_contato
             }
         });
+        const arquivo = 'log_contato_deletado.txt';
 
+        const log = `Contato ${contatoDeletado} foi deletado.`;
+        gravarLog(log, arquivo);
         data = {
             status: 'Contato removido com sucesso!',
             classe: 'alert alert-success'
