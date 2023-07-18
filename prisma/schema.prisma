@@ -1,0 +1,23 @@
+datasource db {
+  provider = "sqlite"
+  url = "file:./sqlite3.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+model Contato {
+  id       Int   @id @default(autoincrement())
+  nome     String
+  idade    Int
+  telefones Telefone[]
+}
+
+model Telefone {
+  id         Int   @id @default(autoincrement())
+  idcontato  Int 
+  numero     String
+  contato    Contato  @relation(fields: [idcontato], references: [id])
+}
